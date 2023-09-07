@@ -1,0 +1,8 @@
+{
+    "prettier.enable": false, // 禁用 prettier
+    "editor.formatOnSave": false, // 保存时自动格式化
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true // 保存时自动修复eslint
+    },
+    "editor.tabSize": 4 // 设置tab缩进为4个空格
+}

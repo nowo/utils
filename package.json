@@ -1,0 +1,43 @@
+{
+    "name": "@cooj/utils",
+    "type": "module",
+    "version": "1.0.0",
+    "packageManager": "pnpm@8.6.12",
+    "description": "",
+    "author": "",
+    "license": "ISC",
+    "funding": "https://github.com/cooj/utils",
+    "homepage": "https://github.com/cooj/utils",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cooj/utils"
+    },
+    "bugs": "https://github.com/cooj/utils/issues",
+    "keywords": [],
+    "exports": {
+        ".": {
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.cjs"
+        }
+    },
+    "main": "./dist/index.cjs",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "dev": "unbuild --stub",
+        "build": "unbuild",
+        "test": "vitest",
+        "lint:fix": "eslint . --fix"
+    },
+    "devDependencies": {
+        "@antfu/eslint-config": "^0.41.0",
+        "@cooj/eslint-config-vue": "^0.1.2",
+        "@types/node": "^20.5.9",
+        "eslint": "^8.48.0",
+        "typescript": "^5.2.2",
+        "unbuild": "^2.0.0",
+        "vitest": "^0.34.3"
+    }
+}
