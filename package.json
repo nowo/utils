@@ -13,7 +13,7 @@
         "url": "https://github.com/cooj/utils"
     },
     "bugs": "https://github.com/cooj/utils/issues",
-    "keywords": [],
+    "keywords": ["utils"],
     "exports": {
         ".": {
             "import": "./dist/index.mjs",
@@ -25,6 +25,10 @@
     "files": [
         "dist"
     ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
     "scripts": {
         "dev": "unbuild --stub",
         "build": "unbuild",
