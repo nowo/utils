@@ -13,7 +13,9 @@
         "url": "https://github.com/cooj/utils"
     },
     "bugs": "https://github.com/cooj/utils/issues",
-    "keywords": ["utils"],
+    "keywords": [
+        "utils"
+    ],
     "exports": {
         ".": {
             "import": "./dist/index.mjs",
@@ -43,5 +45,8 @@
         "typescript": "^5.2.2",
         "unbuild": "^2.0.0",
         "vitest": "^0.34.3"
+    },
+    "dependencies": {
+        "changelogithub": "^0.13.0"
     }
 }
