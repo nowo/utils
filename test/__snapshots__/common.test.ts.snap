@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`commo > snapshot 1`] = `
+{
+  "foo": "bar",
+}
+`;
+
+exports[`common > snapshot 1`] = `
+{
+  "foo": "bar",
+}
+`;
+
+exports[`date > snapshot 1`] = `
+{
+  "foo": "bar",
+}
+`;
+
+exports[`date > snapshot 2`] = `
+{
+  "foo": "bar",
+}
+`;
+
+exports[`suite name > snapshot 1`] = `
+{
+  "foo": "bar",
+}
+`;
+
+exports[`ty > snapshot 1`] = `
+{
+  "foo": "bar",
+}
+`;
+
+exports[`types > snapshot 1`] = `
+{
+  "foo": "bar",
+}
+`;

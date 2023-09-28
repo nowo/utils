@@ -8,14 +8,14 @@
     types(100); // "number"
     types(null); // "null"
     types(); // "undefined"
-    types(/abcd/); // "regex"
+    types(/abcd/); // "regexp"
     types(new Date()); // "date"
  *
  */
-export function types(o: any) {
+export function types(o?: any) {
     const s = Object.prototype.toString.call(o)
     const end = s.match(/\[object (.*?)\]/)?.[1].toLowerCase()
-    return end as 'string' | 'object' | 'array' | 'number' | 'null' | 'undefined' | 'regex' | 'date' | undefined
+    return end as 'string' | 'object' | 'array' | 'number' | 'null' | 'undefined' | 'regexp' | 'date' | undefined
 }
 
 /**
