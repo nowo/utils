@@ -1,3 +1,4 @@
+/** @type import('changelogithub').ChangelogenOptions */
 export default {
     types: {
         feat: { title: '🚀 Features' },
