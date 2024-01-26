@@ -1,9 +1,0 @@
-{
-    "extends": [
-        "@antfu",
-        "@cooj/eslint-config-vue"
-    ],
-    "rules": {
-        // "prefer-regex-literals": "off"
-    }
-}
