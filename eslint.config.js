@@ -1,15 +1,20 @@
 import antfu from '@antfu/eslint-config'
 
-export default antfu(
+// import unocss from '@unocss/eslint-plugin'
+
+// import cooj from '@cooj/eslint-config-vue'
+
+// console.log(cooj)
+
+const eslint = antfu(
     {
-        // unocss: true,
-        // formatters: true,
         stylistic: {
             indent: 4, // 4, or 'tab'
             quotes: 'single', // or 'double'
         },
         // `.eslintignore` is no longer supported in Flat config, use `ignores` instead
         ignores: [
+            '.github',
             '*.sh',
             // 'node_modules',
             'lib',
@@ -26,20 +31,20 @@ export default antfu(
             'build',
             'index.html',
             'vite.config.ts.timestamp*',
-            'src/router/layout.ts',
         ],
     },
+    // unocss.configs.flat,
     {
         rules: {
-            // 保存代码时缩进4个空格
-            // 'indent': [
-            //     'error',
-            //     4,
-            //     {
-            //         SwitchCase: 1,
-            //     },
-            // ],
-            // 'indent': ['error', 4],
+        // 保存代码时缩进4个空格
+        // 'indent': [
+        //     'error',
+        //     4,
+        //     {
+        //         SwitchCase: 1,
+        //     },
+        // ],
+        // 'indent': ['error', 4],
             'no-console': [
                 'warn',
                 {
@@ -50,8 +55,8 @@ export default antfu(
             // 'brace-style': ['error', '1tbs', { allowSingleLine: true }],
             'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
 
-            'jsonc/indent': ['error', 4],
-            'style/indent': ['error', 4],
+            // 'jsonc/indent': ['error', 4],
+            // 'style/indent': ['error', 4],
             // '@typescript-eslint/brace-style': [
             //     'error',
             //     '1tbs',
@@ -60,14 +65,41 @@ export default antfu(
             //     // }
             // ],
             // '@typescript-eslint/indent': 'off',
-            'ts/no-use-before-define': [
-                'error',
-                {
-                    variables: false,
-                },
-            ],
+            // '@typescript-eslint/no-use-before-define': [
+            //     'error',
+            //     {
+            //         variables: false,
+            //     },
+            // ],
             'antfu/if-newline': 'off', // 允许if(a==1) return 1  这种单行的格式
             'antfu/top-level-function': 'off',
+            // 'vue/component-tags-order': [
+            //     'error',
+            //     { order: ['template', 'script', 'style'] },
+            // ],
+            // 'vue/block-order': ['error', { order: ['template', 'script', 'style'] }],
+            // 'vue/first-attribute-linebreak': [
+            //     'warn',
+            //     {
+            //         multiline: 'beside',
+            //     },
+            // ],
+            // 'vue/html-closing-bracket-newline': [
+            //     'warn',
+            //     {
+            //         multiline: 'never',
+            //     },
+            // ],
+            // 'vue/html-indent': [
+            //     'warn',
+            //     4,
+            //     {
+            //         alignAttributesVertically: false,
+            //     },
+            // ],
+            // 'vue/dot-location': 'off',
+            // 'vue/comma-dangle': ['error', 'only-multiline'],
+            // 'vue/object-curly-newline': ['warn', 'never'],
             'unused-imports/no-unused-vars': [
                 'warn',
                 {
@@ -85,3 +117,5 @@ export default antfu(
         },
     },
 )
+// console.log('eslint :>> ', eslint)
+export default eslint

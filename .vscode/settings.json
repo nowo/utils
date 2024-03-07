@@ -4,6 +4,8 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
         "source.organizeImports": "never"
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "never"
     },
     "editor.tabSize": 4, // 设置tab缩进为4个空格
     "editor.formatOnSave": true,
