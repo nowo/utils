@@ -1,12 +1,15 @@
 {
     "prettier.enable": false, // 禁用 prettier
-    "editor.formatOnSave": false, // 保存时自动格式化
+    // "editor.formatOnSave": false, // 保存时自动格式化
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
         "source.organizeImports": "never"
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "never"
     },
-
     "editor.tabSize": 4, // 设置tab缩进为4个空格
-        // Enable the ESlint flat config support
-        "eslint.experimental.useFlatConfig": true,
+    "editor.formatOnSave": true,
+    "files.insertFinalNewline": true,
+    // Enable the ESlint flat config support
+    "eslint.experimental.useFlatConfig": true,
 }

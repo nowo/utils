@@ -17,7 +17,7 @@ describe('common', () => {
 
 describe('date', () => {
     it('formatTime', () => {
-        expect(formatTime()).toMatch(/^2023-/)
+        expect(formatTime()).toMatch(/^2024-/)
         expect(formatTime('2020/03/01 10:20:30')).toBe('2020-03-01 10:20:30')
         expect(formatTime(new Date('2023-09-09 '))).toMatch(/^2023-09-09/)
 
