@@ -24,7 +24,7 @@
 export function add(a: number, b: number) {
     const [, aDecimal] = String(a).split('.')
     const [, bDecimal] = String(a).split('.')
-    const precision = Math.max(aDecimal?.length || 1, bDecimal?.length || 1)
+    const precision = Math.max(aDecimal?.length || 0, bDecimal?.length || 0)
     const factor = 10 ** precision
 
     const result = (a * factor + b * factor) / factor
