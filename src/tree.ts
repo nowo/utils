@@ -7,6 +7,7 @@
  * @returns any[]
  * @example
  * ```ts
+ *
  * let list = [
  *     {
  *         name: 'option1', id: 1,
@@ -17,6 +18,7 @@
  *     { name: 'option2', id: 2 }
  * ]
  * getTreeParentsList(list, 3, 'id', 'children') // [{ name: 'option1', id: 1 }, { name: 'option1.1', id: 3 }]
+ *
  * ```
  */
 export function getTreeParentList<T = any>(data: Array<T>, val: T[keyof T], key = 'id' as keyof T, children = 'children' as keyof T): T[] {
