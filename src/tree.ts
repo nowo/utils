@@ -6,7 +6,7 @@
  * @param children 子类的键值，默认children
  * @returns any[]
  * @example
- * ```js|ts
+ * ```ts
  * let list = [
  *     {
  *         name: 'option1', id: 1,
@@ -53,7 +53,7 @@ export function getTreeParentList<T = any>(data: Array<T>, val: T[keyof T], key 
  * @param children 子类元素集合的键名，默认为'children'
  * @return {T} 父级内容
  * @example
- * ```js|ts
+ * ```ts
  * let list = [
  *     {
  *         name: 'option1', id: 1,
@@ -94,7 +94,7 @@ export const getTreeParentItem = <T = any>(data: T[], val: T[keyof T], key: keyo
  * @param children 子类
  * @returns {T} 对应的项
  * @example
- * ```js|ts
+ * ```ts
  * let list = [
  *     {
  *         name: 'option1', id: 1,
@@ -132,7 +132,7 @@ export function findTreeNodeItem<T = any>(data: Array<T>, val: T[keyof T], key =
  * @param name 查找关键字对应的那个键名
  * @param children 子类元素集合的键名，默认为'children'
  * @example
- * ```js|ts
+ * ```js
  * let list = [
  *     {
  *         name: 'option1', id: 1,
@@ -168,7 +168,7 @@ export function filterTreeList<T = any>(data: T[], keyword: T[keyof T], name: ke
  * @param key 上级所属的键值，默认pid
  * @param children 嵌套数组的子类，子类的键值，默认children
  * @returns any[]
- * ```js|ts
+ * ```js
  * let list = [
  *     {
  *         name: 'option1', id: 1,
@@ -178,6 +178,7 @@ export function filterTreeList<T = any>(data: T[], keyword: T[keyof T], name: ke
  *     },
  *     { name: 'option2', id: 2 }
  * ]
+ *
  * transformTreeToArrayList(list, 'id', 'pid', 'children') // [{ name: 'option1', id: 1, pid: 0, children: [{ name: 'option1.1', id: 3 }] }, { name: 'option1.1', id: 3, pid: 1 }, { name: 'option2', id: 2 }]
  * ```
  */
@@ -204,7 +205,7 @@ export function transformTreeToArrayList<T = any>(classifyList: Array<T>, id = '
  * @param pid 归属于哪个id的字段名（父id字段名），默认为pid
  * @returns Array
  * @example
- * ```js|ts
+ * ```js
  * const list = [
  *     { name: 'option1', id: 1 },
  *     { name: 'option1.1', id: 3, pid: 1 },
