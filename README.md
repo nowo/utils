@@ -8,6 +8,10 @@ yarn add @cooj/utils
 # or
 pnpm i @cooj/utils
 ```
+
+### 详细内容
+<a href="https://nowo.github.io/utils/">文档详细介绍</a>
+
 #### 方法
 - 获取时间,并格式化
 ```ts
