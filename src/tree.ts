@@ -1,3 +1,5 @@
+import { deepClone } from './common'
+
 /**
  * 根据当前一级id(或字段)查找上级所有的节点内容（平级）
  * @param data 嵌套数组
@@ -128,6 +130,40 @@ export function findTreeNodeItem<T = any>(data: Array<T>, val: T[keyof T], key =
 }
 
 /**
+ * 树形数据过滤,保留符合条件的数据（子类数据也照样处理），不改变原有数据
+ * @param data 全部数据
+ * @param val 键值name对应的值，符合条件的值
+ * @param name 值对应的那个键名
+ * @param children 子类元素集合的键名，默认为'children'
+ * @example
+ * ```js
+ * let list = [
+ *     {
+ *         name: 'option1', id: 1, is_hidden: true,
+ *         children: [
+ *             { name: 'option1.1', id: 3, is_hidden: true },
+ *             { name: 'option1.2', id: 5, is_hidden: false }
+ *         ]
+ *     },
+ *     {
+ *         name: 'option2', id: 2, is_hidden: false
+ *         children: [
+ *             { name: 'option2.1', id: 4, is_hidden: false }
+ *         ]
+ *     },
+ * ]
+ * filterTreeList(list, true, 'is_hidden', 'children') // [{ name: 'option1', id: 1, is_hidden: true,children: [{ name: 'option1.1', id: 3, is_hidden: true }] }]
+ * ```
+ */
+export function filterTreeList<T = any>(data: T[], val: T[keyof T], name: keyof T, children = 'children' as keyof T): T[] {
+    const _list = deepClone(data)
+    return _list.filter((item: any) => {
+        if (item[children] && item[children]?.length) item[children] = filterTreeList(item[children], val, name, children)
+        return item[name] === val
+    })
+}
+
+/**
  * 树形数据过滤（模糊匹配），上级匹配上就直接全部返回(包括子类)，匹配到子类就往上找父级
  * @param data 全部数据
  * @param keyword 用于模糊查询的关键字
@@ -144,10 +180,10 @@ export function findTreeNodeItem<T = any>(data: Array<T>, val: T[keyof T], key =
  *     },
  *     { name: 'option2', id: 2 }
  * ]
- * filterTreeList(list, '.1', 'id', 'children') // [{ name: 'option1', id: 1, children: [{ name: 'option1.1', id: 3 }] }]
+ * searchTreeList(list, '.1', 'id', 'children') // [{ name: 'option1', id: 1, children: [{ name: 'option1.1', id: 3 }] }]
  * ```
  */
-export function filterTreeList<T = any>(data: T[], keyword: T[keyof T], name: keyof T, children = 'children' as keyof T): T[] {
+export function searchTreeList<T = any>(data: T[], keyword: T[keyof T], name: keyof T, children = 'children' as keyof T): T[] {
     const result: any[] = []
     let item: any
     for (item of data) {
