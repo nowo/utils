@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { formatTime } from '../src/date'
-import { types } from '../src/common'
+import { pathJoin, types } from '../src/common'
 
 describe('common', () => {
     it('types', () => {
@@ -12,6 +12,14 @@ describe('common', () => {
         expect(types()).toBe('undefined')
         expect(types(/abcd/)).toBe('regexp')
         expect(types(new Date())).toBe('date')
+    })
+    it('pathJoin', () => {
+        expect(pathJoin('', '')).toBe('')
+        expect(pathJoin('/upload/', '/2024/', '/1/')).toBe('/upload/2024/1')
+        expect(pathJoin('/upload', '2024', '/1')).toBe('/upload/2024/1')
+        expect(pathJoin('upload/', '/2024/', '/1/')).toBe('upload/2024/1')
+        expect(pathJoin('upload', '2024', '1')).toBe('upload/2024/1')
+        expect(pathJoin('upload', '/2024/', '/10/')).toBe('upload/2024/10')
     })
 })
 

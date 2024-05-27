@@ -116,3 +116,27 @@ export function getFileType(fileName: string) {
 
     return result || 'other'
 }
+
+/**
+ * URL地址路径拼接
+ * @param {string[]} arg - 需要拼接的字符串数组
+ * @returns {string} 拼接后的路径字符串
+ * @example
+ * ```js
+ * pathJoin('a', 'b', 'c')  // 'a/b/c'
+ * ```
+ */
+export const pathJoin = (...arg: string[]) => {
+    const arr: string[] = []
+    arg.forEach((item, index) => {
+        // 去除空格左右两边空格,为空不添加
+        item = item?.trim?.()
+        if (!item) return
+        // 去除开头的斜杠，（第一个不处理）
+        if (item.startsWith('/') && index) item = item.slice(1)
+        // 去除结尾的斜杠
+        if (item.endsWith('/')) item = item.slice(0, -1)
+        arr.push(item)
+    })
+    return arr.join('/')
+}
