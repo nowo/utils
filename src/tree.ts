@@ -187,7 +187,8 @@ export function searchTreeList<T = any>(data: T[], keyword: T[keyof T], name: ke
     const result: any[] = []
     let item: any
     for (item of data) {
-        if (item[name].includes(keyword)) {
+        let val=typeof item[name] ==='number'?item[name].toString():item[name]
+        if (val.includes(keyword)) {
             result.push(item)
         } else if (item.children && item.children.length > 0) {
             const filteredChildren = filterTreeList(item.children, keyword, name, children)
