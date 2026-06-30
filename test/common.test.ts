@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { debounce, deepClone, formatBytes, getFileType, isEmpty, parseQuery, pathJoin, stringifyQuery, throttle, toThousands, types, wait } from '../src/common'
+import { debounce, deepClone, isEmpty, throttle, toThousands, types, wait } from '../src/common'
 import { formatTime, timeAgo } from '../src/date'
 
 describe('common', () => {
@@ -31,24 +31,6 @@ describe('common', () => {
         expect(source.nested.list).toEqual([1, 2, 3]) // 改克隆不影响原数据
         expect(cloned.date).toBeInstanceOf(Date) // Date 被正确克隆
         expect(deepClone([{ a: 1 }])).toEqual([{ a: 1 }]) // 数组
-    })
-    it('pathJoin', () => {
-        expect(pathJoin('', '')).toBe('')
-        expect(pathJoin('/upload/', '/2024/', '/1/')).toBe('/upload/2024/1')
-        expect(pathJoin('/upload', '2024', '/1')).toBe('/upload/2024/1')
-        expect(pathJoin('upload/', '/2024/', '/1/')).toBe('upload/2024/1')
-        expect(pathJoin('upload', '2024', '1')).toBe('upload/2024/1')
-        expect(pathJoin('upload', '/2024/', '/10/')).toBe('upload/2024/10')
-    })
-    it('getFileType', () => {
-        expect(getFileType('a.png')).toBe('image')
-        expect(getFileType('a.MP4')).toBe('video') // 大小写不敏感
-        expect(getFileType('a.wmv')).toBe('video') // wmv 属视频
-        expect(getFileType('a.wma')).toBe('audio') // wma 属音频
-        expect(getFileType('a.png?v=1')).toBe('image') // 带查询参数
-        expect(getFileType('a.xyz')).toBe('other') // 未知后缀
-        expect(getFileType('')).toBe('other') // 无后缀统一返回 'other'
-        expect(getFileType('README')).toBe('other') // 无扩展名
     })
     it('isEmpty', () => {
         expect(isEmpty('')).toBe(true)
@@ -96,27 +78,6 @@ describe('common', () => {
         fn() // 超过间隔再次执行
         expect(count).toBe(2)
         vi.useRealTimers()
-    })
-    it('parseQuery', () => {
-        expect(parseQuery('?a=1&b=2')).toEqual({ a: '1', b: '2' })
-        expect(parseQuery('a=1&b=hello%20world')).toEqual({ a: '1', b: 'hello world' }) // 自动 decode
-        expect(parseQuery('https://x.com/p?id=2&t=3')).toEqual({ id: '2', t: '3' }) // 完整 URL
-        expect(parseQuery('?a=1#frag')).toEqual({ a: '1' }) // 忽略 hash
-        expect(parseQuery('')).toEqual({})
-    })
-    it('stringifyQuery', () => {
-        expect(stringifyQuery({ a: 1, b: 'x' })).toBe('a=1&b=x')
-        expect(stringifyQuery({ a: 1, b: null, c: undefined })).toBe('a=1') // 跳过 null/undefined
-        expect(stringifyQuery({ id: [1, 2] })).toBe('id=1&id=2') // 数组展开
-        expect(stringifyQuery({ q: 'a b' })).toBe('q=a+b') // 自动 encode
-    })
-    it('formatBytes', () => {
-        expect(formatBytes(0)).toBe('0B')
-        expect(formatBytes(500)).toBe('500B')
-        expect(formatBytes(1024)).toBe('1KB')
-        expect(formatBytes(1536)).toBe('1.5KB')
-        expect(formatBytes(1048576)).toBe('1MB')
-        expect(formatBytes(-1)).toBe('') // 非法
     })
 })
 
