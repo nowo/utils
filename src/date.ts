@@ -9,7 +9,7 @@ import { types } from './common'
  *  var timestamp = 1472048779952; //js一般获取的时间戳是13位，PHP一般是10位
     formatTime(timestamp,'YYYY-mm-dd HH:MM:SS') // 2016-08-24 22:26:19
  */
-export function formatTime(num: number | string | Date = new Date().getTime(), format = '') {
+export function formatTime(num: number | string | Date = Date.now(), format = '') {
     format = format || 'YYYY-mm-dd HH:MM:SS' // 第一个参数不填时，使用默认格式
     let ret, date: Date, reNum
 
