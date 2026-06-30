@@ -30,6 +30,8 @@ deepClone({ id: 1, nested: { a: 1 } })
 
 ## API
 
+> 所有方法均从包根 `@wzo/utils` 导出，下面按功能模块分组说明。
+
 ### 通用（common）
 
 | 方法 | 说明 |
@@ -37,24 +39,48 @@ deepClone({ id: 1, nested: { a: 1 } })
 | `types(value)` | 判断数据类型，返回 `'string' \| 'array' \| 'object' \| 'number' \| 'date' \| 'regexp' \| 'boolean' \| 'function' \| 'null' \| 'undefined'` 等 |
 | `wait(ms)` | 返回一个在 `ms` 毫秒后 resolve 的 Promise（值为 `ms`），用于 `await` 延时 |
 | `deepClone(data)` | 深拷贝（优先 `structuredClone`，失败时回退手动递归），不修改原数据 |
-| `getFileType(fileName)` | 按扩展名判断文件分类：`image / txt / excel / word / pdf / video / audio / zip / other` |
-| `formatBytes(bytes, decimals?)` | 字节数转可读大小，如 `1536 → '1.5KB'` |
-| `pathJoin(...segments)` | 拼接 URL/路径片段，自动去除多余斜杠与空段 |
-| `parseQuery(str)` | query 串/完整 URL → 对象（自动 decode，忽略 hash） |
-| `stringifyQuery(obj)` | 对象 → query 串（自动 encode，跳过 `null`/`undefined`，数组展开） |
 | `isEmpty(value)` | 判空：`'' / [] / {} / null / undefined / 空 Map\|Set`（`0`、`false` 不算空） |
 | `toThousands(num)` | 数字千分位，如 `1234567 → '1,234,567'` |
 | `debounce(fn, wait?, immediate?)` | 防抖，返回的函数带 `cancel()` 取消方法 |
 | `throttle(fn, wait?)` | 节流（首次立即执行） |
 
 ```ts
-import { formatBytes, getFileType, parseQuery, pathJoin, toThousands } from '@wzo/utils'
+import { debounce, isEmpty, toThousands, types } from '@wzo/utils'
+
+types(/a/) // 'regexp'
+isEmpty([]) // true
+toThousands(1234567.89) // '1,234,567.89'
+const onInput = debounce(() => search(), 500)
+```
+
+### URL（url）
+
+| 方法 | 说明 |
+| --- | --- |
+| `pathJoin(...segments)` | 拼接 URL/路径片段，自动去除多余斜杠与空段 |
+| `parseQuery(str)` | query 串/完整 URL → 对象（自动 decode，忽略 hash） |
+| `stringifyQuery(obj)` | 对象 → query 串（自动 encode，跳过 `null`/`undefined`，数组展开） |
+
+```ts
+import { parseQuery, pathJoin, stringifyQuery } from '@wzo/utils'
+
+pathJoin('/upload/', '/2024/', '/1/') // '/upload/2024/1'
+parseQuery('?a=1&b=hello%20world') // { a: '1', b: 'hello world' }
+stringifyQuery({ id: [1, 2] }) // 'id=1&id=2'
+```
+
+### 文件（file）
+
+| 方法 | 说明 |
+| --- | --- |
+| `getFileType(fileName)` | 按扩展名判断文件分类：`image / txt / excel / word / pdf / video / audio / zip / other` |
+| `formatBytes(bytes, decimals?)` | 字节数转可读大小，如 `1536 → '1.5KB'` |
+
+```ts
+import { formatBytes, getFileType } from '@wzo/utils'
 
 getFileType('photo.PNG') // 'image'（大小写不敏感）
 formatBytes(1234567) // '1.18MB'
-pathJoin('/upload/', '/2024/', '/1/') // '/upload/2024/1'
-parseQuery('?a=1&b=hello%20world') // { a: '1', b: 'hello world' }
-toThousands(1234567.89) // '1,234,567.89'
 ```
 
 ### 时间（date）
