@@ -1,0 +1,9 @@
+shellEmulator: true
+trustPolicy: no-downgrade
+# undici-types 是 @types/node 的纯类型依赖，6.21.0 仅停发 provenance 证明，
+# 并非供应链事件，属误报，单独放行而不关闭整体策略。
+trustPolicyExclude:
+  - undici-types@6.21.0
+
+allowBuilds:
+  esbuild: true

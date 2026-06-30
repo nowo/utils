@@ -1,18 +1,18 @@
 {
-    "name": "@cooj/utils",
+    "name": "@wzo/utils",
     "type": "module",
     "version": "0.0.5",
-    "packageManager": "pnpm@8.6.12",
+    "packageManager": "pnpm@10.34.4",
     "description": "",
     "author": "",
     "license": "ISC",
-    "funding": "https://github.com/cooj/utils",
-    "homepage": "https://github.com/cooj/utils",
+    "funding": "https://github.com/nowo/utils",
+    "homepage": "https://github.com/nowo/utils",
     "repository": {
         "type": "git",
-        "url": "https://github.com/cooj/utils"
+        "url": "https://github.com/nowo/utils"
     },
-    "bugs": "https://github.com/cooj/utils/issues",
+    "bugs": "https://github.com/nowo/utils/issues",
     "keywords": [
         "utils"
     ],
@@ -35,20 +35,23 @@
         "dev": "unbuild --stub",
         "build": "unbuild",
         "test": "vitest",
-        "typedoc": "typedoc --out docs src/index.ts",
-        "type-help": "typedoc --help",
+        "typecheck": "tsc --noEmit",
+        "docs:api": "typedoc",
+        "docs:dev": "pnpm docs:api && vitepress dev docs",
+        "docs:build": "pnpm docs:api && vitepress build docs",
+        "docs:preview": "vitepress preview docs",
         "lint:fix": "eslint . --fix"
     },
-    "dependencies": {},
     "devDependencies": {
-        "@antfu/eslint-config": "^2.8.0",
-        "@cooj/eslint-config-vue": "^0.1.3",
-        "@types/node": "^20.11.25",
-        "changelogithub": "^0.13.3",
-        "eslint": "^8.57.0",
-        "typedoc": "^0.25.12",
-        "typescript": "^5.4.2",
-        "unbuild": "^2.0.0",
-        "vitest": "^1.3.1"
+        "@types/node": "^22.20.0",
+        "@wzo/eslint-config": "^0.0.3",
+        "eslint": "^9.39.4",
+        "typedoc": "^0.28.19",
+        "typedoc-plugin-markdown": "^4.12.0",
+        "typedoc-vitepress-theme": "^1.1.3",
+        "typescript": "^5.9.3",
+        "unbuild": "^3.6.1",
+        "vitepress": "2.0.0-alpha.17",
+        "vitest": "^4.1.9"
     }
 }
