@@ -24,29 +24,19 @@ import { deepClone } from './common'
  * ```
  */
 export function getTreeParentList<T = any>(data: Array<T>, val: T[keyof T], key = 'id' as keyof T, children = 'children' as keyof T): T[] {
-    const temp: any[] = []
-    const forFn = function (arr: any[], id: T[keyof T]) {
-        for (let i = 0; i < arr.length; i++) {
-            const item = arr[i]
-            // 找到值对应的那一项，追加进去
-            if (item[key] === val) temp.push(item)
-
-            if (item[children]) {
-                const data1 = item[children].find((item1: any) => {
-                    return item1[key] === id
-                })
-                if (data1) {
-                    temp.unshift(item) // 数组前面追加进去
-                    forFn(data, item[key])
-                    break
-                } else {
-                    forFn(item[children], id)
-                }
-            }
+    // 深度优先：找到目标节点时，path 中即为「根 → 目标」的完整链路
+    const path: T[] = []
+    const dfs = (arr: any[]): boolean => {
+        for (const item of arr) {
+            path.push(item)
+            if (item[key] === val) return true // 命中目标，链路即 path
+            if (Array.isArray(item[children]) && dfs(item[children])) return true
+            path.pop() // 该分支未命中，回溯
         }
+        return false
     }
-    forFn(data, val)
-    return temp
+    dfs(data as any[])
+    return path
 }
 
 /**
@@ -70,7 +60,7 @@ export function getTreeParentList<T = any>(data: Array<T>, val: T[keyof T], key 
  * getTreeParentItem(list, 3, 'id', 'children') // { name: 'option1', id: 1, children: [{ name: 'option1.1', id: 3 }] }
  * ```
  */
-export const getTreeParentItem = <T = any>(data: T[], val: T[keyof T], key: keyof T, children = 'children' as keyof T): T | undefined => {
+export const getTreeParentItem = <T = any>(data: T[], val: T[keyof T], key = 'id' as keyof T, children = 'children' as keyof T): T | undefined => {
     let temp: any = ''
     const forFn = function (arr: any[], id: T[keyof T]) {
         for (let i = 0; i < arr.length; i++) {
@@ -129,6 +119,14 @@ export function findTreeNodeItem<T = any>(data: Array<T>, val: T[keyof T], key =
     return temp
 }
 
+// filterTreeList 的内部递归实现：入参已是深拷贝副本，故递归内不再克隆
+function filterTreeNodes<T = any>(list: T[], val: T[keyof T], name: keyof T, children: keyof T): T[] {
+    return list.filter((item: any) => {
+        if (item[children]?.length) item[children] = filterTreeNodes(item[children], val, name, children)
+        return item[name] === val
+    })
+}
+
 /**
  * 树形数据过滤,保留符合条件的数据（子类数据也照样处理），不改变原有数据
  * @param data 全部数据
@@ -156,11 +154,8 @@ export function findTreeNodeItem<T = any>(data: Array<T>, val: T[keyof T], key =
  * ```
  */
 export function filterTreeList<T = any>(data: T[], val: T[keyof T], name: keyof T, children = 'children' as keyof T): T[] {
-    const _list = deepClone(data)
-    return _list.filter((item: any) => {
-        if (item[children] && item[children]?.length) item[children] = filterTreeList(item[children], val, name, children)
-        return item[name] === val
-    })
+    // 只在入口深拷贝一次，递归内部直接复用，避免每层重复克隆子树
+    return filterTreeNodes(deepClone(data), val, name, children)
 }
 
 /**
@@ -180,20 +175,23 @@ export function filterTreeList<T = any>(data: T[], val: T[keyof T], name: keyof 
  *     },
  *     { name: 'option2', id: 2 }
  * ]
- * searchTreeList(list, '.1', 'id', 'children') // [{ name: 'option1', id: 1, children: [{ name: 'option1.1', id: 3 }] }]
+ * searchTreeList(list, '.1', 'name', 'children') // [{ name: 'option1', id: 1, children: [{ name: 'option1.1', id: 3 }] }]
  * ```
  */
 export function searchTreeList<T = any>(data: T[], keyword: T[keyof T], name: keyof T, children = 'children' as keyof T): T[] {
     const result: any[] = []
-    let item: any
-    for (item of data) {
-        let val=typeof item[name] ==='number'?item[name].toString():item[name]
-        if (val.includes(keyword)) {
+    for (const item of data as any[]) {
+        const field = item[name]
+        const val = typeof field === 'number' ? String(field) : field
+        // 自身模糊命中：整项保留（含全部子级）
+        if (typeof val === 'string' && val.includes(keyword as any)) {
             result.push(item)
-        } else if (item.children && item.children.length > 0) {
-            const filteredChildren = filterTreeList(item.children, keyword, name, children)
-            if (filteredChildren.length > 0) {
-                result.push({ ...item, children: filteredChildren })
+        } else {
+            const childList = item[children]
+            if (Array.isArray(childList) && childList.length > 0) {
+                // 子级递归模糊匹配，命中则带上当前父级
+                const matchedChildren = searchTreeList(childList, keyword, name, children)
+                if (matchedChildren.length > 0) result.push({ ...item, [children]: matchedChildren })
             }
         }
     }
@@ -218,12 +216,12 @@ export function searchTreeList<T = any>(data: T[], keyword: T[keyof T], name: ke
  *     { name: 'option2', id: 2 }
  * ]
  *
- * transformTreeToArrayList(list, 'id', 'pid', 'children') // [{ name: 'option1', id: 1, pid: 0, children: [{ name: 'option1.1', id: 3 }] }, { name: 'option1.1', id: 3, pid: 1 }, { name: 'option2', id: 2 }]
+ * transformTreeToArrayList(list, 'id', 'pid', 'children') // [{ name: 'option1', id: 1, children: [{ name: 'option1.1', id: 3, pid: 1 }] }, { name: 'option1.1', id: 3, pid: 1 }, { name: 'option2', id: 2 }]
  * ```
  */
 export function transformTreeToArrayList<T = any>(classifyList: Array<T>, id = 'id' as keyof T, key = 'pid', children = 'children' as keyof T): T[] {
     const temp: any[] = []
-    const forFn = function (arr: string | any[], val = 0) {
+    const forFn = function (arr: any[], val = 0) {
         for (let i = 0; i < arr.length; i++) {
             const item = arr[i]
             if (val) item[key] = val
@@ -232,7 +230,8 @@ export function transformTreeToArrayList<T = any>(classifyList: Array<T>, id = '
             if (item[children]) forFn(item[children], item[id])
         }
     }
-    forFn(classifyList)
+    // 深拷贝后再处理，避免给调用方原数据写入 pid / 改动结构
+    forFn(deepClone(classifyList))
     return temp
 }
 
@@ -257,24 +256,26 @@ export function transformArrayToTreeList<T = any>(sNodes: T[], child = 'children
     // var id = "id";    //id字段名
     // var pid = "pid";  //父id字段名
 
+    // 深拷贝后再处理，避免给调用方原数据写入 children 字段
+    const nodes = deepClone(sNodes)
     const r = []
     const tmpMap: any = {}
-    for (let i = 0; i < sNodes.length; i++) {
+    for (let i = 0; i < nodes.length; i++) {
         // 判断原先数组有没有这个字段
-        if (sNodes[i][child]) {
+        if (nodes[i][child]) {
             throw new Error(`数组中存在${String(child)}字段，换一个参数`)
         }
-        tmpMap[sNodes[i][id]] = sNodes[i]
+        tmpMap[nodes[i][id]] = nodes[i]
     }
-    for (let i = 0; i < sNodes.length; i++) {
-        const p = tmpMap[sNodes[i][pid]] // 得到会在子类的项
+    for (let i = 0; i < nodes.length; i++) {
+        const p = tmpMap[nodes[i][pid]] // 得到会在子类的项
 
-        if (p && sNodes[i][id] !== sNodes[i][pid]) {
+        if (p && nodes[i][id] !== nodes[i][pid]) {
             // 判断是否有child数组,没有就给个空数组（也就是刚开始的时候）
             p[child] = p[child] ? p[child] : []
-            p[child].push(sNodes[i]) // 追加到当前项
+            p[child].push(nodes[i]) // 追加到当前项
         } else {
-            r.push(sNodes[i])
+            r.push(nodes[i])
         }
     }
     return r
