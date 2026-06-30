@@ -7,4 +7,8 @@
 dist
 node_modules
 logs
-docs
+
+# VitePress 构建产物与 TypeDoc 自动生成的 API 文档
+docs/.vitepress/dist
+docs/.vitepress/cache
+docs/api
