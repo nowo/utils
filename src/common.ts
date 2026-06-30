@@ -125,3 +125,158 @@ export const pathJoin = (...arg: string[]) => {
     })
     return arr.join('/')
 }
+
+/**
+ * 防抖：在最后一次触发后等待 wait 毫秒再执行，高频触发只生效最后一次
+ * @param fn 需要防抖的函数
+ * @param wait 等待毫秒数，默认 300
+ * @param immediate 是否在第一次触发时立即执行，默认 false
+ * @returns 包装后的函数，带 `cancel()` 取消尚未执行的调用
+ * @example
+ * ```ts
+ * const onInput = debounce(() => search(), 500)
+ * onInput()
+ * onInput.cancel() // 取消未执行的调用
+ * ```
+ */
+export function debounce<T extends (...args: any[]) => any>(fn: T, wait = 300, immediate = false) {
+    let timer: ReturnType<typeof setTimeout> | null = null
+    function debounced(this: any, ...args: Parameters<T>) {
+        if (timer) clearTimeout(timer)
+        if (immediate && !timer) fn.apply(this, args)
+        timer = setTimeout(() => {
+            timer = null
+            if (!immediate) fn.apply(this, args)
+        }, wait)
+    }
+    debounced.cancel = () => {
+        if (timer) clearTimeout(timer)
+        timer = null
+    }
+    return debounced
+}
+
+/**
+ * 节流：每 wait 毫秒最多执行一次（首次立即执行）
+ * @param fn 需要节流的函数
+ * @param wait 间隔毫秒数，默认 300
+ * @returns 包装后的函数
+ * @example
+ * ```ts
+ * const onScroll = throttle(() => log(), 200)
+ * ```
+ */
+export function throttle<T extends (...args: any[]) => any>(fn: T, wait = 300) {
+    let last = 0
+    return function (this: any, ...args: Parameters<T>) {
+        const now = Date.now()
+        if (now - last >= wait) {
+            last = now
+            fn.apply(this, args)
+        }
+    }
+}
+
+/**
+ * 判断值是否为空：null / undefined / '' / 空数组 / 空 Map|Set / 无自身可枚举属性的对象
+ * @param value 任意值
+ * @returns boolean（注意 `0`、`false` 不算空）
+ * @example
+ * ```ts
+ * isEmpty('')   // true
+ * isEmpty([])   // true
+ * isEmpty({})   // true
+ * isEmpty(0)    // false
+ * ```
+ */
+export function isEmpty(value: any): boolean {
+    if (value == null) return true
+    if (typeof value === 'string' || Array.isArray(value)) return value.length === 0
+    if (value instanceof Map || value instanceof Set) return value.size === 0
+    if (typeof value === 'object') return Object.keys(value).length === 0
+    return false
+}
+
+/**
+ * 数字千分位格式化
+ * @param num 数字或可转为数字的字符串
+ * @returns 千分位字符串；非法输入返回 ''
+ * @example
+ * ```ts
+ * toThousands(1234567)     // '1,234,567'
+ * toThousands(1234567.89)  // '1,234,567.89'
+ * toThousands(-1000)       // '-1,000'
+ * ```
+ */
+export function toThousands(num: number | string): string {
+    const n = typeof num === 'string' ? Number(num) : num
+    if (typeof n !== 'number' || Number.isNaN(n)) return ''
+    return n.toLocaleString('en-US', { maximumFractionDigits: 20 })
+}
+
+/**
+ * 解析 query 字符串为对象（自动 decode，重复键取最后一个）
+ * @param str query 串或完整 URL（自动截取 `?` 之后、`#` 之前的部分）
+ * @returns 键值对象
+ * @example
+ * ```ts
+ * parseQuery('?a=1&b=hello%20world') // { a: '1', b: 'hello world' }
+ * parseQuery('https://a.com/p?id=2') // { id: '2' }
+ * ```
+ */
+export function parseQuery(str: string): Record<string, string> {
+    let query = str.includes('?') ? str.slice(str.indexOf('?') + 1) : str
+    const hashIndex = query.indexOf('#')
+    if (hashIndex !== -1) query = query.slice(0, hashIndex)
+
+    const result: Record<string, string> = {}
+    new URLSearchParams(query).forEach((value, key) => {
+        result[key] = value
+    })
+    return result
+}
+
+/**
+ * 对象转 query 字符串（自动 encode，跳过 null/undefined，数组展开为同名多项）
+ * @param obj 键值对象
+ * @returns query 串（不含开头的 `?`）
+ * @example
+ * ```ts
+ * stringifyQuery({ a: 1, b: 'x', c: null }) // 'a=1&b=x'
+ * stringifyQuery({ id: [1, 2] })            // 'id=1&id=2'
+ * ```
+ */
+export function stringifyQuery(obj: Record<string, any>): string {
+    const params = new URLSearchParams()
+    Object.entries(obj).forEach(([key, value]) => {
+        if (value == null) return
+        if (Array.isArray(value)) {
+            value.forEach(v => params.append(key, String(v)))
+        } else {
+            params.append(key, String(value))
+        }
+    })
+    return params.toString()
+}
+
+const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+
+/**
+ * 字节数转可读大小
+ * @param bytes 字节数
+ * @param decimals 保留小数位，默认 2
+ * @returns 形如 `1.5 KB`；非法或负数返回 ''
+ * @example
+ * ```ts
+ * formatBytes(0)       // '0B'
+ * formatBytes(1536)    // '1.5KB'
+ * formatBytes(1234567) // '1.18MB'
+ * ```
+ */
+export function formatBytes(bytes: number, decimals = 2): string {
+    if (typeof bytes !== 'number' || Number.isNaN(bytes) || bytes < 0) return ''
+    if (bytes === 0) return '0B'
+    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), BYTE_UNITS.length - 1)
+    const value = Number.parseFloat((bytes / 1024 ** i).toFixed(decimals))
+    return `${value}${BYTE_UNITS[i]}`
+}

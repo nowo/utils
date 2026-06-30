@@ -47,3 +47,39 @@ export function formatTime(num: number | string | Date = Date.now(), format = ''
     }
     return format
 }
+
+/**
+ * 相对时间：转为「刚刚 / x分钟前 / x小时前 / x天前 / x个月前 / x年前」
+ * @param time 时间戳(10 位秒 / 13 位毫秒) / 时间字符串 / Date，默认当前时间
+ * @returns 相对时间描述；非法输入返回 ''
+ * @example
+ * ```ts
+ * timeAgo(Date.now() - 60_000) // '1分钟前'
+ * ```
+ */
+export function timeAgo(time: number | string | Date = Date.now()): string {
+    let date: Date
+    if (types(time) === 'number') {
+        const num = time as number
+        date = new Date(num.toString().length === 10 ? num * 1000 : num)
+    } else if (types(time) === 'string') {
+        date = new Date(time as string)
+    } else {
+        date = time as Date
+    }
+
+    const diff = Date.now() - date.getTime()
+    if (Number.isNaN(diff)) return ''
+
+    const sec = Math.floor(diff / 1000)
+    if (sec < 60) return '刚刚'
+    const min = Math.floor(sec / 60)
+    if (min < 60) return `${min}分钟前`
+    const hour = Math.floor(min / 60)
+    if (hour < 24) return `${hour}小时前`
+    const day = Math.floor(hour / 24)
+    if (day < 30) return `${day}天前`
+    const month = Math.floor(day / 30)
+    if (month < 12) return `${month}个月前`
+    return `${Math.floor(month / 12)}年前`
+}

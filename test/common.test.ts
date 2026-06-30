@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { deepClone, getFileType, pathJoin, types, wait } from '../src/common'
-import { formatTime } from '../src/date'
+import { describe, expect, it, vi } from 'vitest'
+import { debounce, deepClone, formatBytes, getFileType, isEmpty, parseQuery, pathJoin, stringifyQuery, throttle, toThousands, types, wait } from '../src/common'
+import { formatTime, timeAgo } from '../src/date'
 
 describe('common', () => {
     it('types', () => {
@@ -50,6 +50,74 @@ describe('common', () => {
         expect(getFileType('')).toBe('other') // 无后缀统一返回 'other'
         expect(getFileType('README')).toBe('other') // 无扩展名
     })
+    it('isEmpty', () => {
+        expect(isEmpty('')).toBe(true)
+        expect(isEmpty(null)).toBe(true)
+        expect(isEmpty(undefined)).toBe(true)
+        expect(isEmpty([])).toBe(true)
+        expect(isEmpty({})).toBe(true)
+        expect(isEmpty(new Map())).toBe(true)
+        expect(isEmpty(0)).toBe(false) // 0 不算空
+        expect(isEmpty('a')).toBe(false)
+        expect(isEmpty([1])).toBe(false)
+        expect(isEmpty({ a: 1 })).toBe(false)
+    })
+    it('toThousands', () => {
+        expect(toThousands(1234567)).toBe('1,234,567')
+        expect(toThousands(1234567.89)).toBe('1,234,567.89')
+        expect(toThousands(-1000)).toBe('-1,000')
+        expect(toThousands('2000')).toBe('2,000')
+        expect(toThousands('abc')).toBe('') // 非法输入
+    })
+    it('debounce', () => {
+        vi.useFakeTimers()
+        let count = 0
+        const fn = debounce(() => count++, 100)
+        fn()
+        fn()
+        fn()
+        expect(count).toBe(0) // 还未触发
+        vi.advanceTimersByTime(100)
+        expect(count).toBe(1) // 多次触发只执行最后一次
+        fn()
+        fn.cancel()
+        vi.advanceTimersByTime(100)
+        expect(count).toBe(1) // cancel 后不再执行
+        vi.useRealTimers()
+    })
+    it('throttle', () => {
+        vi.useFakeTimers()
+        let count = 0
+        const fn = throttle(() => count++, 100)
+        fn() // 首次立即执行
+        fn() // 间隔内忽略
+        expect(count).toBe(1)
+        vi.advanceTimersByTime(100)
+        fn() // 超过间隔再次执行
+        expect(count).toBe(2)
+        vi.useRealTimers()
+    })
+    it('parseQuery', () => {
+        expect(parseQuery('?a=1&b=2')).toEqual({ a: '1', b: '2' })
+        expect(parseQuery('a=1&b=hello%20world')).toEqual({ a: '1', b: 'hello world' }) // 自动 decode
+        expect(parseQuery('https://x.com/p?id=2&t=3')).toEqual({ id: '2', t: '3' }) // 完整 URL
+        expect(parseQuery('?a=1#frag')).toEqual({ a: '1' }) // 忽略 hash
+        expect(parseQuery('')).toEqual({})
+    })
+    it('stringifyQuery', () => {
+        expect(stringifyQuery({ a: 1, b: 'x' })).toBe('a=1&b=x')
+        expect(stringifyQuery({ a: 1, b: null, c: undefined })).toBe('a=1') // 跳过 null/undefined
+        expect(stringifyQuery({ id: [1, 2] })).toBe('id=1&id=2') // 数组展开
+        expect(stringifyQuery({ q: 'a b' })).toBe('q=a+b') // 自动 encode
+    })
+    it('formatBytes', () => {
+        expect(formatBytes(0)).toBe('0B')
+        expect(formatBytes(500)).toBe('500B')
+        expect(formatBytes(1024)).toBe('1KB')
+        expect(formatBytes(1536)).toBe('1.5KB')
+        expect(formatBytes(1048576)).toBe('1MB')
+        expect(formatBytes(-1)).toBe('') // 非法
+    })
 })
 
 describe('date', () => {
@@ -66,6 +134,16 @@ describe('date', () => {
         // 1694253088667
         expect(formatTime(1694253088667)).toMatch(/^2023-09-09/)
         expect(formatTime(1694253088)).toMatch(/^2023-09-09/)
+    })
+
+    it('timeAgo', () => {
+        vi.useFakeTimers()
+        vi.setSystemTime(new Date('2026-06-30 12:00:00'))
+        expect(timeAgo(Date.now())).toBe('刚刚')
+        expect(timeAgo(Date.now() - 60_000)).toBe('1分钟前')
+        expect(timeAgo(Date.now() - 2 * 3600_000)).toBe('2小时前')
+        expect(timeAgo(Date.now() - 3 * 86400_000)).toBe('3天前')
+        vi.useRealTimers()
     })
 
     it('bar', () => {

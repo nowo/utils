@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
+    eachTreeList,
     filterTreeList,
     findTreeNodeItem,
     getTreeParentItem,
     getTreeParentList,
+    mapTreeList,
     searchTreeList,
     transformArrayToTreeList,
     transformTreeToArrayList,
@@ -139,6 +141,31 @@ describe('getTreeParentItem / getTreeParentList / findTreeNodeItem', () => {
 
     it('getTreeParentList 命中根节点返回单元素链路', () => {
         expect(getTreeParentList(makeList(), 1).map(i => i.id)).toEqual([1])
+    })
+})
+
+describe('eachTreeList / mapTreeList', () => {
+    it('eachTreeList 遍历每个节点', () => {
+        const ids: number[] = []
+        eachTreeList(makeList(), node => ids.push(node.id))
+        expect(ids.sort()).toEqual([1, 2, 3, 5])
+    })
+
+    it('eachTreeList 回调返回 false 跳过子级', () => {
+        const ids: number[] = []
+        eachTreeList(makeList(), (node) => {
+            ids.push(node.id)
+            return node.id !== 1 // 命中 id=1 时跳过其子级
+        })
+        expect(ids.sort()).toEqual([1, 2]) // 3、5 被跳过
+    })
+
+    it('mapTreeList 映射为新结构且不改原数据', () => {
+        const list = makeList()
+        const mapped = mapTreeList(list, n => ({ value: n.id, label: n.name }))
+        expect(mapped[0]).toMatchObject({ value: 1, label: 'option1' })
+        expect((mapped[0] as any).children[0]).toMatchObject({ value: 3, label: 'option1.1' })
+        expect(list).toEqual(makeList()) // 原数据不变
     })
 })
 

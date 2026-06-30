@@ -280,3 +280,42 @@ export function transformArrayToTreeList<T = any>(sNodes: T[], child = 'children
     }
     return r
 }
+
+/**
+ * 深度遍历树的每个节点
+ * @param data 树形数组
+ * @param callback (node, parent, level) 回调；返回 false 可跳过当前节点的子级
+ * @param children 子级键名，默认 'children'
+ * @example
+ * ```ts
+ * eachTreeList(list, (node) => { node.label = node.name }) // 给每个节点加 label
+ * ```
+ */
+export function eachTreeList<T = any>(data: T[], callback: (node: T, parent: T | null, level: number) => void | boolean, children = 'children' as keyof T): void {
+    const walk = (arr: any[], parent: any, level: number) => {
+        for (const node of arr) {
+            if (callback(node, parent, level) === false) continue
+            if (Array.isArray(node[children])) walk(node[children], node, level + 1)
+        }
+    }
+    walk(data, null, 0)
+}
+
+/**
+ * 映射树的每个节点，返回结构相同的新树（不改变原数据）
+ * @param data 树形数组
+ * @param callback (node, level) 返回映射后的新节点对象
+ * @param children 子级键名，默认 'children'
+ * @example
+ * ```ts
+ * mapTreeList(list, n => ({ value: n.id, label: n.name })) // 转成 value/label 结构
+ * ```
+ */
+export function mapTreeList<T = any, R = any>(data: T[], callback: (node: T, level: number) => R, children = 'children' as keyof T): R[] {
+    const walk = (arr: any[], level: number): R[] => arr.map((node) => {
+        const mapped: any = callback(node, level)
+        if (Array.isArray(node[children])) mapped[children] = walk(node[children], level + 1)
+        return mapped
+    })
+    return walk(data, 0)
+}
