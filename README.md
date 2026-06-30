@@ -38,15 +38,23 @@ deepClone({ id: 1, nested: { a: 1 } })
 | `wait(ms)` | 返回一个在 `ms` 毫秒后 resolve 的 Promise（值为 `ms`），用于 `await` 延时 |
 | `deepClone(data)` | 深拷贝（优先 `structuredClone`，失败时回退手动递归），不修改原数据 |
 | `getFileType(fileName)` | 按扩展名判断文件分类：`image / txt / excel / word / pdf / video / audio / zip / other` |
+| `formatBytes(bytes, decimals?)` | 字节数转可读大小，如 `1536 → '1.5KB'` |
 | `pathJoin(...segments)` | 拼接 URL/路径片段，自动去除多余斜杠与空段 |
+| `parseQuery(str)` | query 串/完整 URL → 对象（自动 decode，忽略 hash） |
+| `stringifyQuery(obj)` | 对象 → query 串（自动 encode，跳过 `null`/`undefined`，数组展开） |
+| `isEmpty(value)` | 判空：`'' / [] / {} / null / undefined / 空 Map\|Set`（`0`、`false` 不算空） |
+| `toThousands(num)` | 数字千分位，如 `1234567 → '1,234,567'` |
+| `debounce(fn, wait?, immediate?)` | 防抖，返回的函数带 `cancel()` 取消方法 |
+| `throttle(fn, wait?)` | 节流（首次立即执行） |
 
 ```ts
-import { getFileType, pathJoin, types, wait } from '@wzo/utils'
+import { formatBytes, getFileType, parseQuery, pathJoin, toThousands } from '@wzo/utils'
 
-types(/a/) // 'regexp'
-await wait(1000) // 延时 1 秒
 getFileType('photo.PNG') // 'image'（大小写不敏感）
+formatBytes(1234567) // '1.18MB'
 pathJoin('/upload/', '/2024/', '/1/') // '/upload/2024/1'
+parseQuery('?a=1&b=hello%20world') // { a: '1', b: 'hello world' }
+toThousands(1234567.89) // '1,234,567.89'
 ```
 
 ### 时间（date）
@@ -54,13 +62,15 @@ pathJoin('/upload/', '/2024/', '/1/') // '/upload/2024/1'
 | 方法 | 说明 |
 | --- | --- |
 | `formatTime(num?, format?)` | 时间戳 / 时间字符串 / `Date` 格式化为指定格式，默认 `'YYYY-mm-dd HH:MM:SS'` |
+| `timeAgo(time?)` | 相对时间，如 `刚刚 / 3分钟前 / 2小时前 / 5天前` |
 
 ```ts
-import { formatTime } from '@wzo/utils'
+import { formatTime, timeAgo } from '@wzo/utils'
 
 formatTime() // 当前时间，默认格式
 formatTime('2023/09/09 10:30:50', 'YYYY年mm月dd日') // '2023年09月09日'
 formatTime(1694253088) // 10 位秒级时间戳同样支持
+timeAgo(Date.now() - 60_000) // '1分钟前'
 ```
 
 ### 树形结构（tree）
@@ -74,6 +84,8 @@ formatTime(1694253088) // 10 位秒级时间戳同样支持
 | `searchTreeList(data, keyword, name, children?)` | 模糊查找：节点命中则整项保留，子级命中则带上其父级，不改原数据 |
 | `transformTreeToArrayList(list, id?, key?, children?)` | 树形数组 → 平级数组，并写入 `pid`，不改原数据 |
 | `transformArrayToTreeList(list, child?, id?, pid?)` | 平级数组 → 树形数组，不改原数据 |
+| `eachTreeList(data, cb, children?)` | 深度遍历每个节点，回调返回 `false` 可跳过其子级 |
+| `mapTreeList(data, cb, children?)` | 映射为结构相同的新树，不改原数据 |
 
 ```ts
 import { searchTreeList, transformArrayToTreeList } from '@wzo/utils'
