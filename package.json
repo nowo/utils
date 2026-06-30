@@ -3,11 +3,11 @@
     "type": "module",
     "version": "0.0.8",
     "packageManager": "pnpm@10.34.4",
-    "description": "",
+    "description": "常用的 TypeScript 工具函数库：类型判断、深拷贝、时间格式化、文件类型识别、树形结构处理等",
     "author": "",
     "license": "ISC",
     "funding": "https://github.com/nowo/utils",
-    "homepage": "https://github.com/nowo/utils",
+    "homepage": "https://nowo.github.io/utils/",
     "repository": {
         "type": "git",
         "url": "https://github.com/nowo/utils"
