@@ -34,6 +34,7 @@
     "scripts": {
         "dev": "unbuild --stub",
         "build": "unbuild",
+        "prepack": "pnpm build",
         "test": "vitest",
         "typecheck": "tsc --noEmit",
         "docs:api": "typedoc",
