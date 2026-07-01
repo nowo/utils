@@ -1,7 +1,7 @@
 {
     "name": "@wzo/utils",
     "type": "module",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "packageManager": "pnpm@10.34.4",
     "description": "常用的 TypeScript 工具函数库：类型判断、深拷贝、时间格式化、文件类型识别、树形结构处理等",
     "author": "",
