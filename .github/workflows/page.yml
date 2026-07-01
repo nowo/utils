@@ -2,9 +2,14 @@
 name: Deploy docs to Pages
 
 on:
-  # 推送到默认分支时触发
+  # 推送到默认分支且改动影响文档时触发（排除 test、配置、版本号等无关变更，避免无谓的重新部署）
   push:
     branches: [main]
+    paths:
+      - src/**          # typedoc 从源码生成 API
+      - docs/**         # vitepress 内容与配置
+      - typedoc.json
+      - .github/workflows/page.yml   # 部署流程本身变更时也重跑
   # 允许在 Actions 页面手动触发
   workflow_dispatch:
 
@@ -20,19 +25,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
@@ -42,20 +50,13 @@ jobs:
         run: pnpm docs:build
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs/.vitepress/dist
 
-  deploy:
-    needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
