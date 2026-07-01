@@ -29,4 +29,19 @@ export default defineConfig(
             'function-call-argument-newline': ['error', 'consistent'],
         },
     },
+    {
+        // 文档（markdown）代码块只作示意，关闭格式/未用/console 等噪声规则；
+        // 语法错误及 markdown 结构仍会正常校验
+        files: ['**/*.md/**'],
+        rules: {
+            'style/indent': 'off',
+            'style/semi': 'off',
+            'style/quotes': 'off',
+            'style/comma-dangle': 'off',
+            'prefer-const': 'off',
+            'no-console': 'off',
+            'no-unused-vars': 'off',
+            'unused-imports/no-unused-vars': 'off',
+        },
+    },
 )

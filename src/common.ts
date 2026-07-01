@@ -31,11 +31,7 @@ export function types(o?: any) {
  * ```
  */
 export function wait(ms: number) {
-    return new Promise<number>((resolve, reject) => {
-        setTimeout(() => {
-            resolve(ms)
-        }, ms)
-    })
+    return new Promise<number>(resolve => setTimeout(resolve, ms, ms))
 }
 
 /**
@@ -52,10 +48,10 @@ export const deepClone = <T = any>(data: T): T => {
     // 先使用原生自带的深拷贝，出错了就使用自己自定义的方法
     try {
         newObj = structuredClone(data)
-    } catch (err) {
+    } catch (_err) {
         try {
             newObj = Array.isArray(data) ? [] : {}
-        } catch (error) {
+        } catch (_error) {
             newObj = {}
         }
         for (const attr in data) {
