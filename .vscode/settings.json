@@ -1,15 +1,10 @@
 {
     "prettier.enable": false, // 禁用 prettier
-    // "editor.formatOnSave": false, // 保存时自动格式化
+    "editor.formatOnSave": false, // 关闭编辑器默认格式化，交给下面的 ESLint fixAll
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit",
-        "source.organizeImports": "never"
-        "source.fixAll.eslint": "explicit",
-        "source.organizeImports": "never"
+        "source.fixAll.eslint": "explicit", // 保存时自动 eslint --fix
+        "source.organizeImports": "never" // import 排序由 ESLint 规则接管，不用 VSCode 自带
     },
-    "editor.tabSize": 4, // 设置tab缩进为4个空格
-    "editor.formatOnSave": true,
-    "files.insertFinalNewline": true,
-    // Enable the ESlint flat config support
-    "eslint.experimental.useFlatConfig": true,
+    "editor.tabSize": 4, // 设置 tab 缩进为 4 个空格
+    "files.insertFinalNewline": true
 }
