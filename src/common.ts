@@ -1,4 +1,6 @@
 const toStringTagRE = /\[object (.*?)\]/
+const UUID_TEMPLATE_RE = /[xy]/g
+const DEFAULT_ID_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
 /**
  * @function 判断数据类型
@@ -134,6 +136,107 @@ export function isEmpty(value: any): boolean {
     if (value instanceof Map || value instanceof Set) return value.size === 0
     if (typeof value === 'object') return Object.keys(value).length === 0
     return false
+}
+
+/**
+ * 深比较两个值是否相等（递归对比，支持对象/数组/Date/RegExp/Map/Set）
+ * @param a 值 A
+ * @param b 值 B
+ * @returns boolean
+ * @example
+ * ```ts
+ * deepEqual({ a: 1, b: [1, 2] }, { a: 1, b: [1, 2] }) // true
+ * deepEqual([1, { x: 1 }], [1, { x: 2 }])             // false
+ * deepEqual(Number.NaN, Number.NaN)                   // true
+ * ```
+ */
+export function deepEqual(a: any, b: any): boolean {
+    if (Object.is(a, b)) return true
+    if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) return false
+    if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime()
+    if (a instanceof RegExp && b instanceof RegExp) return a.toString() === b.toString()
+    // 类型不同直接判否（如数组 vs 普通对象、Map vs 对象）
+    if (a.constructor !== b.constructor) return false
+
+    if (a instanceof Map) {
+        if (a.size !== b.size) return false
+        for (const [key, value] of a) {
+            if (!b.has(key) || !deepEqual(value, b.get(key))) return false
+        }
+        return true
+    }
+    if (a instanceof Set) {
+        if (a.size !== b.size) return false
+        for (const value of a) {
+            if (!b.has(value)) return false
+        }
+        return true
+    }
+
+    const keysA = Object.keys(a)
+    const keysB = Object.keys(b)
+    if (keysA.length !== keysB.length) return false
+    return keysA.every(key => Object.hasOwn(b, key) && deepEqual(a[key], b[key]))
+}
+
+/**
+ * 生成标准 UUID v4（优先原生 `crypto.randomUUID`，不支持时回退手动实现）
+ * @returns 形如 `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx` 的 36 位字符串
+ * @example
+ * ```ts
+ * getUuid() // 'a1b2c3d4-...-e5f6...'
+ * ```
+ */
+export function getUuid(): string {
+    const c = globalThis.crypto
+    if (c?.randomUUID) return c.randomUUID()
+    // 回退：手动按 v4 规则拼接（version 位固定 4，variant 位取 8/9/a/b）
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(UUID_TEMPLATE_RE, (ch) => {
+        const r = Math.floor(Math.random() * 16)
+        const v = ch === 'x' ? r : 8 + (r % 4)
+        return v.toString(16)
+    })
+}
+
+/**
+ * 生成指定长度的随机字符串 ID（类 nanoid，优先使用 `crypto` 保证随机质量）
+ * @param length 长度，默认 8
+ * @param chars 可选字母表，默认大小写字母 + 数字
+ * @returns 随机 ID
+ * @example
+ * ```ts
+ * getRandomId()             // 'aZ3kPq7X'（8 位）
+ * getRandomId(12)           // 12 位
+ * getRandomId(6, '0123456789') // 纯数字 6 位验证码
+ * ```
+ */
+export function getRandomId(length = 8, chars = DEFAULT_ID_CHARS): string {
+    let result = ''
+    const c = globalThis.crypto
+    if (c?.getRandomValues) {
+        const bytes = c.getRandomValues(new Uint8Array(length))
+        for (let i = 0; i < length; i++) result += chars[bytes[i] % chars.length]
+    } else {
+        for (let i = 0; i < length; i++) result += chars[Math.floor(Math.random() * chars.length)]
+    }
+    return result
+}
+
+let uniqueIdCounter = 0
+
+/**
+ * 生成进程内自增唯一 ID（用于列表 key、临时 DOM id 等，重启后从头计数）
+ * @param prefix 可选前缀
+ * @returns `${prefix}${自增数字}`
+ * @example
+ * ```ts
+ * getUniqueId()      // '1'
+ * getUniqueId('row_') // 'row_2'
+ * ```
+ */
+export function getUniqueId(prefix = ''): string {
+    uniqueIdCounter += 1
+    return `${prefix}${uniqueIdCounter}`
 }
 
 /**

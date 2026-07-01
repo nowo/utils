@@ -40,16 +40,22 @@ deepClone({ id: 1, nested: { a: 1 } })
 | `wait(ms)` | 返回一个在 `ms` 毫秒后 resolve 的 Promise（值为 `ms`），用于 `await` 延时 |
 | `deepClone(data)` | 深拷贝（优先 `structuredClone`，失败时回退手动递归），不修改原数据 |
 | `isEmpty(value)` | 判空：`'' / [] / {} / null / undefined / 空 Map\|Set`（`0`、`false` 不算空） |
+| `deepEqual(a, b)` | 深比较两个值，支持对象/数组/`Date`/`RegExp`/`Map`/`Set`，`NaN` 视为相等 |
+| `getUuid()` | 生成标准 UUID v4（优先原生 `crypto.randomUUID`，不支持时回退实现） |
+| `getRandomId(length?, chars?)` | 随机字符串 ID（类 nanoid），默认 8 位大小写字母 + 数字，字母表可自定义 |
+| `getUniqueId(prefix?)` | 进程内自增唯一 ID，如 `getUniqueId('row_') → 'row_1'`（重启后从头计数） |
 | `toThousands(num)` | 数字千分位，如 `1234567 → '1,234,567'` |
 | `debounce(fn, wait?, immediate?)` | 防抖，返回的函数带 `cancel()` 取消方法 |
 | `throttle(fn, wait?)` | 节流（首次立即执行） |
 
 ```ts
-import { debounce, isEmpty, toThousands, types } from '@wzo/utils'
+import { debounce, getRandomId, getUuid, isEmpty, toThousands, types } from '@wzo/utils'
 
 types(/a/) // 'regexp'
 isEmpty([]) // true
 toThousands(1234567.89) // '1,234,567.89'
+getUuid() // 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d'
+getRandomId(6, '0123456789') // 纯数字 6 位，如 '074915'
 const onInput = debounce(() => search(), 500)
 ```
 
@@ -60,6 +66,7 @@ const onInput = debounce(() => search(), 500)
 | `pathJoin(...segments)` | 拼接 URL/路径片段，自动去除多余斜杠与空段 |
 | `parseQuery(str)` | query 串/完整 URL → 对象（自动 decode，忽略 hash） |
 | `stringifyQuery(obj)` | 对象 → query 串（自动 encode，跳过 `null`/`undefined`，数组展开） |
+| `setQueryParam(url, params)` | 往 URL 设置/合并 query 参数，保留原参数与 hash，值为 `null`/`undefined` 则删除该键 |
 
 ```ts
 import { parseQuery, pathJoin, stringifyQuery } from '@wzo/utils'
@@ -67,6 +74,7 @@ import { parseQuery, pathJoin, stringifyQuery } from '@wzo/utils'
 pathJoin('/upload/', '/2024/', '/1/') // '/upload/2024/1'
 parseQuery('?a=1&b=hello%20world') // { a: '1', b: 'hello world' }
 stringifyQuery({ id: [1, 2] }) // 'id=1&id=2'
+setQueryParam('/p?a=1#top', { b: 2 }) // '/p?a=1&b=2#top'
 ```
 
 ### 文件（file）
@@ -74,13 +82,19 @@ stringifyQuery({ id: [1, 2] }) // 'id=1&id=2'
 | 方法 | 说明 |
 | --- | --- |
 | `getFileType(fileName)` | 按扩展名判断文件分类：`image / txt / excel / word / pdf / video / audio / zip / other` |
+| `getFileExt(fileName)` | 取文件扩展名（小写、不含点，无后缀返回 `''`） |
 | `formatBytes(bytes, decimals?)` | 字节数转可读大小，如 `1536 → '1.5KB'` |
+| `downloadFile(source, filename?)` | 浏览器端触发下载，`source` 支持 `Blob` 或 URL/dataURL |
+| `blobToBase64(blob)` | `Blob` → base64 dataURL（浏览器 & Node 均可用），返回 `Promise` |
+| `base64ToBlob(base64, type?)` | base64/dataURL → `Blob`（浏览器 & Node 均可用） |
 
 ```ts
-import { formatBytes, getFileType } from '@wzo/utils'
+import { blobToBase64, formatBytes, getFileExt, getFileType } from '@wzo/utils'
 
 getFileType('photo.PNG') // 'image'（大小写不敏感）
+getFileExt('a.tar.gz') // 'gz'
 formatBytes(1234567) // '1.18MB'
+await blobToBase64(new Blob(['hi'], { type: 'text/plain' })) // 'data:text/plain;base64,aGk='
 ```
 
 ### 时间（date）

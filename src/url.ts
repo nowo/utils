@@ -66,3 +66,39 @@ export function stringifyQuery(obj: Record<string, any>): string {
     })
     return params.toString()
 }
+
+/**
+ * 往 URL 上设置/合并 query 参数（保留原有参数与 hash，值为 null/undefined 则删除该键）
+ * @param url 原始 URL 或路径（可含 query 与 hash）
+ * @param params 要设置的键值对；数组展开为同名多项，null/undefined 删除对应键
+ * @returns 新的 URL 字符串
+ * @example
+ * ```ts
+ * setQueryParam('/p?a=1', { b: 2 })          // '/p?a=1&b=2'
+ * setQueryParam('/p?a=1', { a: 2 })          // '/p?a=2'（覆盖）
+ * setQueryParam('/p?a=1&b=2', { b: null })   // '/p?a=1'（删除）
+ * setQueryParam('/p?a=1#top', { b: 2 })      // '/p?a=1&b=2#top'（保留 hash）
+ * ```
+ */
+export function setQueryParam(url: string, params: Record<string, any>): string {
+    const hashIndex = url.indexOf('#')
+    const hash = hashIndex !== -1 ? url.slice(hashIndex) : ''
+    const base = hashIndex !== -1 ? url.slice(0, hashIndex) : url
+    const queryIndex = base.indexOf('?')
+    const path = queryIndex !== -1 ? base.slice(0, queryIndex) : base
+    const search = new URLSearchParams(queryIndex !== -1 ? base.slice(queryIndex + 1) : '')
+
+    Object.entries(params).forEach(([key, value]) => {
+        if (value == null) {
+            search.delete(key)
+        } else if (Array.isArray(value)) {
+            search.delete(key)
+            value.forEach(v => search.append(key, String(v)))
+        } else {
+            search.set(key, String(value))
+        }
+    })
+
+    const qs = search.toString()
+    return `${path}${qs ? `?${qs}` : ''}${hash}`
+}

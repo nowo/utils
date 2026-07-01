@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { debounce, deepClone, isEmpty, throttle, toThousands, types, wait } from '../src/common'
+import { debounce, deepClone, deepEqual, getRandomId, getUniqueId, getUuid, isEmpty, throttle, toThousands, types, wait } from '../src/common'
 import { formatTime, timeAgo } from '../src/date'
 
 describe('common', () => {
@@ -46,6 +46,42 @@ describe('common', () => {
         expect(isEmpty('a')).toBe(false)
         expect(isEmpty([1])).toBe(false)
         expect(isEmpty({ a: 1 })).toBe(false)
+    })
+    it('deepEqual', () => {
+        expect(deepEqual(1, 1)).toBe(true)
+        expect(deepEqual(Number.NaN, Number.NaN)).toBe(true) // NaN 相等
+        expect(deepEqual('a', 'b')).toBe(false)
+        expect(deepEqual({ a: 1, b: [1, 2] }, { a: 1, b: [1, 2] })).toBe(true)
+        expect(deepEqual({ a: 1, b: [1, 2] }, { a: 1, b: [1, 3] })).toBe(false)
+        expect(deepEqual({ a: 1 }, { a: 1, b: 2 })).toBe(false) // 键数量不同
+        expect(deepEqual(new Date('2023-01-01'), new Date('2023-01-01'))).toBe(true)
+        expect(deepEqual(/a/g, /a/g)).toBe(true)
+        expect(deepEqual(/a/g, /a/i)).toBe(false)
+        expect(deepEqual([1, { x: 1 }], [1, { x: 1 }])).toBe(true)
+        expect(deepEqual({ a: 1 }, [1])).toBe(false) // 类型不同
+        expect(deepEqual(new Map([['a', 1]]), new Map([['a', 1]]))).toBe(true)
+        expect(deepEqual(new Set([1, 2]), new Set([2, 1]))).toBe(true)
+        expect(deepEqual(new Set([1, 2]), new Set([1, 3]))).toBe(false)
+        expect(deepEqual(null, undefined)).toBe(false)
+    })
+    it('getUuid', () => {
+        const id = getUuid()
+        expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/) // 标准 v4 格式
+        expect(getUuid()).not.toBe(getUuid()) // 两次不重复
+    })
+    it('getRandomId', () => {
+        expect(getRandomId()).toHaveLength(8) // 默认 8 位
+        expect(getRandomId(12)).toHaveLength(12)
+        expect(getRandomId(100)).toMatch(/^[A-Z0-9]+$/i) // 只含默认字母表字符
+        expect(getRandomId(6, '0123456789')).toMatch(/^\d{6}$/) // 自定义字母表
+        expect(getRandomId(16)).not.toBe(getRandomId(16)) // 基本不重复
+    })
+    it('getUniqueId', () => {
+        const a = getUniqueId('row_')
+        const b = getUniqueId('row_')
+        expect(a).toMatch(/^row_\d+$/)
+        expect(b).not.toBe(a) // 递增，不重复
+        expect(getUniqueId()).toMatch(/^\d+$/) // 无前缀
     })
     it('toThousands', () => {
         expect(toThousands(1234567)).toBe('1,234,567')

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { formatBytes, getFileType } from '../src/file'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { base64ToBlob, blobToBase64, downloadFile, formatBytes, getFileExt, getFileType } from '../src/file'
 
 describe('file', () => {
     it('getFileType', () => {
@@ -20,4 +20,45 @@ describe('file', () => {
         expect(formatBytes(1048576)).toBe('1MB')
         expect(formatBytes(-1)).toBe('') // 非法
     })
+    it('getFileExt', () => {
+        expect(getFileExt('a.PNG')).toBe('png') // 转小写
+        expect(getFileExt('a.tar.gz')).toBe('gz') // 取最后一段
+        expect(getFileExt('a.png?v=1')).toBe('png') // 带查询参数
+        expect(getFileExt('README')).toBe('') // 无扩展名
+        expect(getFileExt('')).toBe('')
+    })
+    it('blobToBase64 / base64ToBlob 互转', async () => {
+        const blob = new Blob(['hi'], { type: 'text/plain' })
+        const dataURL = await blobToBase64(blob)
+        expect(dataURL).toBe('data:text/plain;base64,aGk=')
+
+        const restored = base64ToBlob(dataURL) // dataURL 自带类型
+        expect(restored.type).toBe('text/plain')
+        expect(await restored.text()).toBe('hi')
+
+        const fromRaw = base64ToBlob('aGk=', 'text/plain') // 纯 base64 + 手动类型
+        expect(await fromRaw.text()).toBe('hi')
+    })
+    it('downloadFile', () => {
+        const click = vi.fn()
+        const a = { click, style: {} } as unknown as HTMLAnchorElement
+        vi.stubGlobal('document', {
+            createElement: vi.fn(() => a),
+            body: { appendChild: vi.fn(), removeChild: vi.fn() },
+        })
+        vi.stubGlobal('URL', { createObjectURL: vi.fn(() => 'blob:x'), revokeObjectURL: vi.fn() })
+
+        downloadFile(new Blob(['x']), 'f.txt')
+        expect(a.download).toBe('f.txt')
+        expect(a.href).toBe('blob:x')
+        expect(click).toHaveBeenCalledOnce()
+        expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:x') // Blob 用完释放
+
+        downloadFile('https://a.com/f.pdf', 'f.pdf') // 直接 URL 不走 createObjectURL
+        expect(a.href).toBe('https://a.com/f.pdf')
+    })
+})
+
+afterEach(() => {
+    vi.unstubAllGlobals()
 })
