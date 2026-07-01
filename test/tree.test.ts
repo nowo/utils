@@ -147,7 +147,9 @@ describe('getTreeParentItem / getTreeParentList / findTreeNodeItem', () => {
 describe('eachTreeList / mapTreeList', () => {
     it('eachTreeList 遍历每个节点', () => {
         const ids: number[] = []
-        eachTreeList(makeList(), node => ids.push(node.id))
+        eachTreeList(makeList(), (node) => {
+            ids.push(node.id)
+        })
         expect(ids.sort()).toEqual([1, 2, 3, 5])
     })
 
