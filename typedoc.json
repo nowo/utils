@@ -1,7 +1,13 @@
 {
     "$schema": "https://typedoc.org/schema.json",
     "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
-    "entryPoints": ["src/index.ts"],
+    "entryPoints": [
+        "src/common.ts",
+        "src/date.ts",
+        "src/file.ts",
+        "src/tree.ts",
+        "src/url.ts"
+    ],
     "out": "docs/api",
     "readme": "none",
     "githubPages": false,
@@ -10,5 +16,8 @@
     "useCodeBlocks": true,
     "expandObjects": true,
     "parametersFormat": "table",
-    "docsRoot": "docs"
+    "docsRoot": "docs",
+    "navigation": {
+        "includeGroups": false
+    }
 }
